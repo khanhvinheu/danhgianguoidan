@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "777018023832",
+    "project_id": "danhgia-3606f",
+    "storage_bucket": "danhgia-3606f.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:777018023832:android:91900ce2af56c0e138d5ed",
+        "android_client_info": {
+          "package_name": "com.example.evaluate_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCjEZNOGXbJcAVgI_4uWVTr9bPQtPLCmic"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,4 +1,6 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'dart:async'; // Import this to use Future.delayed
 
 class HomePage extends StatefulWidget {
   @override
@@ -9,20 +11,34 @@ class _HomePageState extends State<HomePage> {
   final PageController _pageController = PageController();
   String? _satisfaction;
   TextEditingController _feedbackController = TextEditingController();
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   // Hàm để điều hướng sang màn "Cảm ơn" sau khi gửi góp ý
-  void _submitFeedback() {
+  void _submitFeedback() async {
     if (_satisfaction == null || _feedbackController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Vui lòng chọn mức độ hài lòng và nhập góp ý!')),
       );
     } else {
-      // Điều hướng đến trang cảm ơn (page 2)
-      _pageController.animateToPage(
-        2, // Điều hướng đến trang cảm ơn (page 2)
-        duration: Duration(milliseconds: 300),
-        curve: Curves.easeInOut,
-      );
+      try {
+        // Lưu góp ý vào Firestore
+        await _firestore.collection('feedbacks').add({
+          'satisfaction': _satisfaction,
+          'feedback': _feedbackController.text,
+          'timestamp': FieldValue.serverTimestamp(),
+        });
+
+        // Điều hướng đến trang cảm ơn (page 2)
+        _pageController.animateToPage(
+          2, // Điều hướng đến trang cảm ơn (page 2)
+          duration: Duration(milliseconds: 300),
+          curve: Curves.easeInOut,
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Đã xảy ra lỗi khi gửi góp ý!')),
+        );
+      }
     }
   }
 
@@ -35,9 +51,7 @@ class _HomePageState extends State<HomePage> {
         curve: Curves.easeInOut,
       );
     } else {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Vui lòng chọn mức độ hài lòng!')));
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Vui lòng chọn mức độ hài lòng!')));
     }
   }
 
@@ -61,8 +75,7 @@ class _HomePageState extends State<HomePage> {
         children: [
           // Màn đánh giá
           FeedbackFormPage(
-            onNext:
-                _goToFeedbackPage, // Chuyển sang màn góp ý khi chọn mức độ hài lòng
+            onNext: _goToFeedbackPage,
             satisfaction: _satisfaction,
             onSatisfactionChange: (value) {
               setState(() {
@@ -73,7 +86,7 @@ class _HomePageState extends State<HomePage> {
           // Màn góp ý
           FeedbackInputPage(
             feedbackController: _feedbackController,
-            onSubmit: _submitFeedback, // Gửi góp ý và chuyển sang màn cảm ơn
+            onSubmit: _submitFeedback,
           ),
           // Màn cảm ơn
           ThankYouPage(
@@ -99,7 +112,6 @@ class FeedbackFormPage extends StatelessWidget {
     required this.satisfaction,
   }) : super(key: key);
 
-  // Hàm để hiển thị các biểu tượng mặt cười
   Widget _buildSatisfactionIcon(IconData icon, String label) {
     return GestureDetector(
       onTap: () => onSatisfactionChange(label),
@@ -127,29 +139,20 @@ class FeedbackFormPage extends StatelessWidget {
             'Bước 1: Chọn mức độ hài lòng',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
           ),
-          SizedBox(height: 40,),
+          SizedBox(height: 40),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _buildSatisfactionIcon(
-                Icons.sentiment_very_satisfied,
-                'Rất hài lòng',              
-              ),
+              _buildSatisfactionIcon(Icons.sentiment_very_satisfied, 'Rất hài lòng'),
               _buildSatisfactionIcon(Icons.sentiment_satisfied, 'Hài lòng'),
-              _buildSatisfactionIcon(
-                Icons.sentiment_dissatisfied,
-                'Không hài lòng',
-              ),
-              _buildSatisfactionIcon(
-                Icons.sentiment_very_dissatisfied,
-                'Tức giận',
-              ),
+              _buildSatisfactionIcon(Icons.sentiment_dissatisfied, 'Không hài lòng'),
+              _buildSatisfactionIcon(Icons.sentiment_very_dissatisfied, 'Tức giận'),
             ],
           ),
           SizedBox(height: 20),
           Center(
             child: ElevatedButton(
-              onPressed: onNext, // Chuyển sang bước 2 khi nhấn "Tiếp theo"
+              onPressed: onNext,
               child: Text('Tiếp theo'),
             ),
           ),
@@ -175,7 +178,6 @@ class FeedbackInputPage extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: SingleChildScrollView(
-        // Cho phép cuộn nếu quá nhiều nội dung
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -206,7 +208,7 @@ class FeedbackInputPage extends StatelessWidget {
 }
 
 // Màn cảm ơn (Bước 3)
-class ThankYouPage extends StatelessWidget {
+class ThankYouPage extends StatefulWidget {
   final String? satisfaction;
   final String feedback;
 
@@ -217,11 +219,24 @@ class ThankYouPage extends StatelessWidget {
   }) : super(key: key);
 
   @override
+  _ThankYouPageState createState() => _ThankYouPageState();
+}
+
+class _ThankYouPageState extends State<ThankYouPage> {
+  @override
+  void initState() {
+    super.initState();
+    // Set a delay to automatically navigate back after 5 seconds
+    Future.delayed(Duration(seconds: 5), () {
+      Navigator.pop(context); // Go back to the previous screen
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: SingleChildScrollView(
-        // Cho phép cuộn nếu quá nhiều nội dung
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -229,18 +244,18 @@ class ThankYouPage extends StatelessWidget {
               'Cảm ơn bạn đã gửi góp ý!',
               style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
-            SizedBox(height: 20),
-            Text(
-              'Mức độ hài lòng: $satisfaction',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            SizedBox(height: 20),
-            Text('Góp ý của bạn: $feedback', style: TextStyle(fontSize: 16)),
+            // SizedBox(height: 20),
+            // Text(
+            //   'Mức độ hài lòng: ${widget.satisfaction}',
+            //   style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            // ),
+            // SizedBox(height: 20),
+            // Text('Góp ý của bạn: ${widget.feedback}', style: TextStyle(fontSize: 16)),
             SizedBox(height: 40),
             Center(
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.pop(context); // Quay lại màn hình chính
+                  Navigator.pop(context); // Manual close if the user clicks the button
                 },
                 child: Text('Đóng'),
               ),

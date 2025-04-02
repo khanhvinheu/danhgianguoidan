@@ -39,8 +39,12 @@ dependencies:
   flutter_zoom_drawer: ^3.2.0
   provider: ^6.0.3
   http: ^1.2.2
-  intl_utils: ^2.0.0 
-
+  intl_utils: ^2.0.0   
+  firebase_core: ^2.4.0
+  firebase_analytics: ^10.0.0
+  cloud_firestore: ^4.3.0
+  firebase_database: ^10.5.7
+  
 dev_dependencies:
   flutter_test: 
     sdk: flutter
