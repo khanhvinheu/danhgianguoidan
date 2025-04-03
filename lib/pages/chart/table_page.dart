@@ -29,7 +29,7 @@ class FeedbackScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Color.fromARGB(255, 31, 44, 52),
-        title: Text('DANH SÁCH GÓP Ý', style: TextStyle(color: Colors.white),),
+        title: Text('DANH SÁCH GÓP Ý', style: TextStyle(color: Colors.white)),
         leading: IconButton(
           icon: Icon(Icons.arrow_back, color: Colors.white),
           onPressed: () {
@@ -40,7 +40,14 @@ class FeedbackScreen extends StatelessWidget {
       body: Padding(
         padding: EdgeInsets.all(30),
         child: StreamBuilder(
-          stream: FirebaseFirestore.instance.collection('feedbacks').snapshots(),
+          stream:
+              FirebaseFirestore.instance
+                  .collection('feedbacks')
+                  .orderBy(
+                    'timestamp',
+                    descending: true,
+                  ) // Sort by timestamp, descending order
+                  .snapshots(),
           builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
             if (snapshot.connectionState == ConnectionState.waiting) {
               return Center(child: CircularProgressIndicator());
@@ -48,14 +55,14 @@ class FeedbackScreen extends StatelessWidget {
             if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
               return Center(child: Text('Không có dữ liệu.'));
             }
-        
+
             var feedbacks = snapshot.data!.docs;
-        
+
             return ListView.builder(
               itemCount: feedbacks.length,
               itemBuilder: (context, index) {
                 var data = feedbacks[index].data() as Map<String, dynamic>;
-        
+
                 return Card(
                   margin: EdgeInsets.symmetric(horizontal: 10, vertical: 5),
                   child: ListTile(
