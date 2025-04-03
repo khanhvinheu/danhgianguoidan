@@ -5,4 +5,5 @@ class RouterName {
   static const String product = 'product';
   static const String categoryProduct = 'categoryProduct';
   static const String chart = 'chart';
+  static const String table = 'table';
 }

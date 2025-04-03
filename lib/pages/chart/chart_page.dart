@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:evaluate_app/apps/router/routerName.dart';
 import 'package:flutter/material.dart';
 import 'package:fl_chart/fl_chart.dart';
+import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
 class ChartPage extends StatefulWidget {
@@ -18,6 +20,7 @@ class _ChartPageState extends State<ChartPage> {
   };
 
   List<Map<String, dynamic>> feedbackList = [];
+  bool isLoading = true; // Track loading state
 
   @override
   void initState() {
@@ -26,6 +29,11 @@ class _ChartPageState extends State<ChartPage> {
   }
 
   void fetchFeedbackData() async {
+    // Start loading
+    setState(() {
+      isLoading = true;
+    });
+
     QuerySnapshot snapshot = await _firestore.collection('feedbacks').get();
     Map<String, int> tempCounts = {
       'Rất hài lòng': 0,
@@ -53,9 +61,11 @@ class _ChartPageState extends State<ChartPage> {
       });
     }
 
+    // Update state after fetching data
     setState(() {
       satisfactionCounts = tempCounts;
       feedbackList = tempFeedbackList;
+      isLoading = false; // Data loaded
     });
   }
 
@@ -67,81 +77,98 @@ class _ChartPageState extends State<ChartPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Thống kê phản hồi')),
+      appBar: AppBar(
+        backgroundColor: Color.fromARGB(255, 31, 44, 52),
+        title: Text('THỐNG KÊ PHẢN HỒI', style: TextStyle(color: Colors.white)),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            context.goNamed(RouterName.splash);
+          },
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.list, color: Colors.white),
+            onPressed: () {
+              context.goNamed(RouterName.table);
+            },
+          ),
+        ],
+      ),
       body: SingleChildScrollView(
         child: Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(50.0),
           child: Column(
             children: [
-              // Bar Chart
-              Container(
-                height: 300, // Adjust this value as needed
-                child: BarChart(
-                  BarChartData(
-                    barGroups:
-                        satisfactionCounts.entries.map((entry) {
-                          return BarChartGroupData(
-                            x: satisfactionCounts.keys.toList().indexOf(
-                              entry.key,
+              // Show loading indicator if data is still being fetched
+              isLoading
+                  ? Center(child: CircularProgressIndicator())
+                  : Container(
+                      height: 300, // Adjust this value as needed
+                      child: BarChart(
+                        BarChartData(
+                          borderData: FlBorderData(
+                            show: true,
+                            border: Border.symmetric(
+                              horizontal: BorderSide(color: Colors.grey),
+                              vertical: BorderSide(color: Colors.grey),
                             ),
-                            barRods: [
-                              BarChartRodData(
-                                toY: entry.value.toDouble(),
-                                color: getColor(entry.key),
-                                width: 20,
+                          ),
+                          gridData: FlGridData(
+                            show: true,
+                            drawVerticalLine: false,
+                            getDrawingHorizontalLine: (value) => FlLine(
+                              color: Colors.grey.shade300,
+                              strokeWidth: 1,
+                            ),
+                          ),
+                          barGroups: satisfactionCounts.entries.map((entry) {
+                            return BarChartGroupData(
+                              x: satisfactionCounts.keys.toList().indexOf(entry.key),
+                              barRods: [
+                                BarChartRodData(
+                                  toY: entry.value.toDouble(),
+                                  color: getColor(entry.key),
+                                  width: 20,
+                                ),
+                              ],
+                            );
+                          }).toList(),
+                          titlesData: FlTitlesData(
+                            topTitles: AxisTitles(
+                              sideTitles: SideTitles(
+                                showTitles: false,
+                                getTitlesWidget: (value, meta) {
+                                  return Text(
+                                    satisfactionCounts.keys.elementAt(value.toInt()),
+                                  );
+                                },
                               ),
-                            ],
-                          );
-                        }).toList(),
-                    titlesData: FlTitlesData(
-                      topTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                          showTitles: false,
-                          getTitlesWidget: (value, meta) {
-                            return Text(
-                              satisfactionCounts.keys.elementAt(value.toInt()),
-                            );
-                          },
-                        ),
-                      ),
-                      bottomTitles: AxisTitles(
-                        sideTitles: SideTitles(
-                          showTitles: true,
-                          getTitlesWidget: (value, meta) {
-                            return Text(
-                              satisfactionCounts.keys.elementAt(value.toInt()),
-                            );
-                          },
+                            ),
+                            rightTitles: AxisTitles(
+                              sideTitles: SideTitles(
+                                showTitles: false,
+                                getTitlesWidget: (value, meta) {
+                                  return Text(
+                                    satisfactionCounts.keys.elementAt(value.toInt()),
+                                  );
+                                },
+                              ),
+                            ),
+                            bottomTitles: AxisTitles(
+                              sideTitles: SideTitles(
+                                showTitles: true,
+                                getTitlesWidget: (value, meta) {
+                                  return Text(
+                                    satisfactionCounts.keys.elementAt(value.toInt()),
+                                  );
+                                },
+                              ),
+                            ),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ),
-              ),
-              SizedBox(height: 16),
-              // Feedback List
-              Text('DANH SÁCH PHẢN HỒI'),
-              ListView.builder(
-                shrinkWrap:
-                    true, // Allows ListView to take only the required space
-                itemCount: feedbackList.length,
-                itemBuilder: (context, index) {
-                  var feedback = feedbackList[index];
-                  return Card(
-                    margin: EdgeInsets.symmetric(vertical: 8),
-                    child: ListTile(
-                      title: Text(feedback['feedback']),
-                      subtitle: Text(
-                        'Satisfaction: ${feedback['satisfaction']}',
-                      ),
-                      trailing: Text(
-                        'Timestamp:${formatTimestamp(feedback['timestamp'])}',
-                        style: TextStyle(fontSize: 12, color: Colors.grey),
-                      ),
-                    ),
-                  );
-                },
-              ),
             ],
           ),
         ),

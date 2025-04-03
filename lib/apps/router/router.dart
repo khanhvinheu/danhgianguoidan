@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:evaluate_app/apps/router/routerName.dart';
 import 'package:evaluate_app/pages/home/home_page.dart';
+import 'package:evaluate_app/pages/chart/table_page.dart';
 
 
 class RouterCustorm {
@@ -30,6 +31,13 @@ class RouterCustorm {
             name: RouterName.chart,
             builder: (BuildContext context, GoRouterState state) {
               return ChartPage();
+            },
+          ),
+          GoRoute(
+            path: 'table',
+            name: RouterName.table,
+            builder: (BuildContext context, GoRouterState state) {
+              return TablePage();
             },
           ),
         ],
