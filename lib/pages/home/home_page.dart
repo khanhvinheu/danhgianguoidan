@@ -249,11 +249,29 @@ class _FeedbackInputPageState extends State<FeedbackInputPage> {
               ),
               maxLines: 5,
             ),
-            IconButton(
-              icon: Icon(_isListening ? Icons.mic : Icons.mic_none),
-              color: _isListening ? Colors.red : Colors.grey,
-              onPressed: _toggleListening,
-            ),
+           GestureDetector(
+              onTap: _toggleListening,
+              child: TweenAnimationBuilder<Color?>(
+                tween: ColorTween(
+                  begin: Colors.grey, // Mic icon color when not listening
+                  end: _isListening ? Colors.red : Colors.grey, // Mic icon color when listening
+                ),
+                duration: Duration(milliseconds: 300), // Duration of the transition
+                builder: (context, color, child) {
+                  return AnimatedContainer(
+                    duration: Duration(milliseconds: 300),
+                    curve: Curves.easeInOut,
+                    child: IconButton(
+                      icon: Icon(
+                        _isListening ? Icons.mic : Icons.mic_none,
+                        size: 40, // You can adjust the size
+                      ),
+                      color: color, // Animated color change
+                      onPressed: _toggleListening,
+                    ),
+                  );
+                },
+              ),),
             ElevatedButton(
               onPressed: widget.onSubmit,
               child: Text('Gửi góp ý'),
