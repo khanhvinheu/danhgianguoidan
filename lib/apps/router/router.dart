@@ -1,3 +1,4 @@
+import 'package:evaluate_app/pages/chart/chart_page.dart';
 import 'package:evaluate_app/pages/splash/splash_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
@@ -8,7 +9,7 @@ import 'package:evaluate_app/pages/home/home_page.dart';
 class RouterCustorm {
   /// The route configuration.
   static final GoRouter router = GoRouter(
-    initialLocation: '/home',
+    initialLocation: '/',
     routes: <RouteBase>[
       GoRoute(
         path: '/',
@@ -22,6 +23,13 @@ class RouterCustorm {
             name: RouterName.home,
             builder: (BuildContext context, GoRouterState state) {
               return HomePage();
+            },
+          ),
+          GoRoute(
+            path: 'chart',
+            name: RouterName.chart,
+            builder: (BuildContext context, GoRouterState state) {
+              return ChartPage();
             },
           ),
         ],

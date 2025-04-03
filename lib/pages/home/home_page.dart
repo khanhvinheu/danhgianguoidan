@@ -1,6 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:evaluate_app/apps/router/routerName.dart';
+import 'package:evaluate_app/pages/splash/splash_screen.dart';
 import 'package:flutter/material.dart';
-import 'dart:async'; // Import this to use Future.delayed
+import 'dart:async';
+
+import 'package:go_router/go_router.dart'; // Import this to use Future.delayed
 
 class HomePage extends StatefulWidget {
   @override
@@ -35,9 +39,9 @@ class _HomePageState extends State<HomePage> {
           curve: Curves.easeInOut,
         );
       } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Đã xảy ra lỗi khi gửi góp ý!')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Đã xảy ra lỗi khi gửi góp ý!')));
       }
     }
   }
@@ -51,7 +55,9 @@ class _HomePageState extends State<HomePage> {
         curve: Curves.easeInOut,
       );
     } else {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Vui lòng chọn mức độ hài lòng!')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Vui lòng chọn mức độ hài lòng!')));
     }
   }
 
@@ -69,6 +75,20 @@ class _HomePageState extends State<HomePage> {
         ),
         backgroundColor: Color.fromARGB(255, 31, 44, 52),
         centerTitle: true,
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () {
+            context.goNamed(RouterName.splash);
+          },
+        ),
+        actions: [
+          IconButton(
+            icon: Icon(Icons.bar_chart, color: Colors.white),
+            onPressed: () {
+              context.goNamed(RouterName.chart);
+            },
+          ),
+        ],
       ),
       body: PageView(
         controller: _pageController,
@@ -143,18 +163,24 @@ class FeedbackFormPage extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              _buildSatisfactionIcon(Icons.sentiment_very_satisfied, 'Rất hài lòng'),
+              _buildSatisfactionIcon(
+                Icons.sentiment_very_satisfied,
+                'Rất hài lòng',
+              ),
               _buildSatisfactionIcon(Icons.sentiment_satisfied, 'Hài lòng'),
-              _buildSatisfactionIcon(Icons.sentiment_dissatisfied, 'Không hài lòng'),
-              _buildSatisfactionIcon(Icons.sentiment_very_dissatisfied, 'Tức giận'),
+              _buildSatisfactionIcon(
+                Icons.sentiment_dissatisfied,
+                'Không hài lòng',
+              ),
+              _buildSatisfactionIcon(
+                Icons.sentiment_very_dissatisfied,
+                'Tức giận',
+              ),
             ],
           ),
           SizedBox(height: 20),
           Center(
-            child: ElevatedButton(
-              onPressed: onNext,
-              child: Text('Tiếp theo'),
-            ),
+            child: ElevatedButton(onPressed: onNext, child: Text('Tiếp theo')),
           ),
         ],
       ),
@@ -255,7 +281,9 @@ class _ThankYouPageState extends State<ThankYouPage> {
             Center(
               child: ElevatedButton(
                 onPressed: () {
-                  Navigator.pop(context); // Manual close if the user clicks the button
+                  Navigator.pop(
+                    context,
+                  ); // Manual close if the user clicks the button
                 },
                 child: Text('Đóng'),
               ),

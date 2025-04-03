@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'dart:async';
 import 'package:go_router/go_router.dart';
 import 'package:transparent_image/transparent_image.dart';
+import 'package:lottie/lottie.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -54,27 +55,40 @@ class _SplashScreenState extends State<SplashScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Logo or Splash Image
-              FadeInImage.memoryNetwork(
+              Lottie.asset(
+                'assets/lottie/robot.json',
+                width: 200,
+                height: 200,
                 fit: BoxFit.cover,
-                height: 50,
-                width: 50,
-                placeholder: kTransparentImage,
-                image:
-                    'https://plus.unsplash.com/premium_photo-1677252438450-b779a923b0f6?q=80&w=1480&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D',
+                repeat: true, // Set to false to play only once
+                reverse: true, // Play in reverse
+                animate: true, // Auto-play animation
               ),
-              const SizedBox(height: 20),
-              Text('Hãy góp ý cho tôi', style: TextStyle(color: Colors.white),),
-              
+              const SizedBox(height: 0),
+              Text(
+                'Hãy góp ý cho tôi!',
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                  fontSize: 25,
+                ),
+              ),
+
               const SizedBox(height: 20),
 
               // Add the "Góp Ý" button here
-              ElevatedButton(
-                onPressed: () {
-                  // Navigate to the feedback screen
-                  context.pushNamed(RouterName.home);
-                },
-                child: const Text('Góp Ý'),
+              SizedBox(
+                width: 200,
+                child: ElevatedButton(
+                  onPressed: () {
+                    // Navigate to the feedback screen
+                    context.pushNamed(RouterName.home);
+                  },
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [const Text('Góp ý ngay', style: TextStyle(fontWeight: FontWeight.bold),), Icon(Icons.arrow_forward)],
+                  ),
+                ),
               ),
             ],
           ),
