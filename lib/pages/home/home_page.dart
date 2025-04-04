@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:speech_to_text/speech_to_text.dart' as stt;
 import 'package:lottie/lottie.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class HomePage extends StatefulWidget {
   @override
@@ -16,7 +17,12 @@ class _HomePageState extends State<HomePage> {
   TextEditingController _feedbackController = TextEditingController();
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
+  @override
   void _submitFeedback() async {
+    final prefs = await SharedPreferences.getInstance();
+    final counter =
+        prefs.getString('selectedStore') ??
+        "No store selected"; // Default value nếu không tìm thấy
     if (_satisfaction == null || _feedbackController.text.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Vui lòng chọn mức độ hài lòng và nhập góp ý!')),
@@ -26,6 +32,7 @@ class _HomePageState extends State<HomePage> {
         await _firestore.collection('feedbacks').add({
           'satisfaction': _satisfaction,
           'feedback': _feedbackController.text,
+          'counter': counter,
           'timestamp': FieldValue.serverTimestamp(),
         });
 
@@ -42,6 +49,7 @@ class _HomePageState extends State<HomePage> {
     }
   }
 
+  @override
   void _goToFeedbackPage() {
     if (_satisfaction != null) {
       _pageController.animateToPage(
@@ -135,7 +143,22 @@ class FeedbackFormPage extends StatelessWidget {
             size: 60,
             color: satisfaction == label ? Colors.blue : Colors.grey,
           ),
-          Text(label),
+          const SizedBox(height: 5), // Khoảng cách giữa icon và tiêu đề
+          SizedBox(
+            width: 100, // Giới hạn chiều rộng để text có thể xuống dòng
+            child: Text(
+              label,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              softWrap: true,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w500,
+                color: satisfaction == label ? Colors.blue : Colors.black87,
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -156,16 +179,19 @@ class FeedbackFormPage extends StatelessWidget {
           children: [
             _buildSatisfactionIcon(
               Icons.sentiment_very_satisfied,
-              'Rất hài lòng',
+              'Hài lòng về thái độ phục vụ',
             ),
-            _buildSatisfactionIcon(Icons.sentiment_satisfied, 'Hài lòng'),
+            _buildSatisfactionIcon(
+              Icons.sentiment_satisfied,
+              'Hài lòng về thời gian phục vụ',
+            ),
             _buildSatisfactionIcon(
               Icons.sentiment_dissatisfied,
-              'Không hài lòng',
+              'Chưa hài lòng về thái độ phục vụ',
             ),
             _buildSatisfactionIcon(
               Icons.sentiment_very_dissatisfied,
-              'Tức giận',
+              'Chưa hài lòng về thời gian phục vụ',
             ),
           ],
         ),
@@ -249,14 +275,19 @@ class _FeedbackInputPageState extends State<FeedbackInputPage> {
               ),
               maxLines: 5,
             ),
-           GestureDetector(
+            GestureDetector(
               onTap: _toggleListening,
               child: TweenAnimationBuilder<Color?>(
                 tween: ColorTween(
                   begin: Colors.grey, // Mic icon color when not listening
-                  end: _isListening ? Colors.red : Colors.grey, // Mic icon color when listening
+                  end:
+                      _isListening
+                          ? Colors.red
+                          : Colors.grey, // Mic icon color when listening
                 ),
-                duration: Duration(milliseconds: 300), // Duration of the transition
+                duration: Duration(
+                  milliseconds: 300,
+                ), // Duration of the transition
                 builder: (context, color, child) {
                   return AnimatedContainer(
                     duration: Duration(milliseconds: 300),
@@ -271,7 +302,8 @@ class _FeedbackInputPageState extends State<FeedbackInputPage> {
                     ),
                   );
                 },
-              ),),
+              ),
+            ),
             ElevatedButton(
               onPressed: widget.onSubmit,
               child: Text('Gửi góp ý'),
