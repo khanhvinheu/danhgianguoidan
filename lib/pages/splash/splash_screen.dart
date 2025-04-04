@@ -17,7 +17,12 @@ class _SplashScreenState extends State<SplashScreen> {
   bool _isConnected = true;
   bool _isLoading = true; // Indicates whether the connection is being checked
   bool _hasTriedAgain = false; // Flag to check if Retry was clicked
-  List<String> stores = ["Đất đai", "Đăng ký kinh doanh", "Chứng thực hộ tịch", "Xây dựng"];
+  List<String> stores = [
+    "Đất đai",
+    "Đăng ký kinh doanh",
+    "Chứng thực hộ tịch",
+    "Xây dựng",
+  ];
   String? selectedStore;
 
   @override
@@ -97,7 +102,10 @@ class _SplashScreenState extends State<SplashScreen> {
                 ),
 
                 const SizedBox(height: 10),
-                Text('Quầy: ${selectedStore}', style: TextStyle(color: Colors.white),),
+                Text(
+                  'Quầy: ${selectedStore}',
+                  style: TextStyle(color: Colors.white),
+                ),
                 const SizedBox(height: 20),
 
                 // Add the "Góp Ý" button here
@@ -127,7 +135,8 @@ class _SplashScreenState extends State<SplashScreen> {
       );
     }
     return Scaffold(
-      appBar: AppBar(title: Text(
+      appBar: AppBar(
+        title: Text(
           'CHỌN QUẦY',
           style: TextStyle(
             fontSize: 20,
@@ -135,13 +144,39 @@ class _SplashScreenState extends State<SplashScreen> {
             color: Colors.white,
           ),
         ),
-        backgroundColor: Color.fromARGB(255, 31, 44, 52),),
+        backgroundColor: Color.fromARGB(255, 31, 44, 52),
+      ),
       body: ListView.builder(
         itemCount: stores.length,
         itemBuilder: (context, index) {
-          return ListTile(
-            title: Text(stores[index]),
-            onTap: () => _selectStore(stores[index]),
+          return Card(
+            elevation: 5,
+            margin: EdgeInsets.symmetric(vertical: 8, horizontal: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            child: ListTile(
+              contentPadding: EdgeInsets.symmetric(
+                vertical: 12,
+                horizontal: 16,
+              ),
+              tileColor: index.isEven ? Colors.lightBlue.shade50 : Colors.white,
+              leading: Icon(Icons.store, color: Colors.blue),
+              title: Text(
+                stores[index],
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  color: Colors.black87,
+                ),
+              ),
+              subtitle: Text(
+                'Chọn quầy để nhận đánh giá và góp ý',
+                style: TextStyle(color: Colors.grey.shade600),
+              ),
+              onTap: () => _selectStore(stores[index]),
+              trailing: Icon(Icons.arrow_forward_ios, color: Colors.blue),
+            ),
           );
         },
       ),
